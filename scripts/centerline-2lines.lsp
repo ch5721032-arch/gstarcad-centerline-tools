@@ -1,0 +1,26 @@
+;; centerline-2lines.lsp - Draw a centerline between two parallel lines
+;; Command: CENLINE2
+;; Usage: pick the two lines of a wall, road or detail
+(defun c:CENLINE2 ( / e1 e2 d1 d2 p1a p1b p2a p2b sa sb ea eb m1 m2 )
+  (setq e1 (car (entsel "\nPick the first line: "))
+        e2 (car (entsel "\nPick the second line: ")))
+  (if (and e1 e2)
+    (progn
+      (setq d1 (entget e1) d2 (entget e2)
+            p1a (cdr (assoc 10 d1)) p1b (cdr (assoc 11 d1))
+            p2a (cdr (assoc 10 d2)) p2b (cdr (assoc 11 d2)))
+      (if (<= (+ (distance p1a p2a) (distance p1b p2b))
+              (+ (distance p1a p2b) (distance p1b p2a)))
+        (setq sa p1a sb p2a ea p1b eb p2b)
+        (setq sa p1a sb p2b ea p1b eb p2a)
+      )
+      (setq m1 (list (/ (+ (car sa) (car sb)) 2.0)
+                     (/ (+ (cadr sa) (cadr sb)) 2.0) 0.0)
+            m2 (list (/ (+ (car ea) (car eb)) 2.0)
+                     (/ (+ (cadr ea) (cadr eb)) 2.0) 0.0))
+      (command "_.LINE" m1 m2 "")
+      (princ "\nCenterline drawn.")
+    )
+  )
+  (princ)
+)
